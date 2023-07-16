@@ -8,7 +8,7 @@ const port = 3000;
 
 
 app.use(express.json());
-
+//get all students
 app.get('/student', (req, res) => {
     fs.readFile(studentFile, (err, jsonData) => {
       if (err) {
@@ -20,7 +20,31 @@ app.get('/student', (req, res) => {
       }
     });
 });
+//get a student by id
+app.get('/student/:id', (req, res) => {
+    const { id } = req.params;
 
+    fs.readFile(studentFile, (err, jsonData) => {
+      if (err) {
+        console.error('Erro ao ler o arquivo JSON:', err);
+        res.status(500).send('Erro interno do servidor');
+      } else {
+        let existingData = [];
+        if (jsonData.length > 0) {
+          existingData = JSON.parse(jsonData);
+        }
+  
+        const dataIndex = existingData.findIndex(item => item.id === id);
+  
+        if (dataIndex === -1) {
+          res.status(404).send('Registro não encontrado');
+        } else {
+            res.json(existingData[dataIndex]);
+        }
+      }
+    });
+});
+//create a new student
 app.post('/student', (req, res) => {
     const newData = req.body;
     fs.readFile(studentFile, (err, jsonData) => {
@@ -63,7 +87,7 @@ app.post('/student', (req, res) => {
       }
     });
 });
-
+//update a student
 app.put('/student/:id', (req, res) => {
     const { id } = req.params;
     const updatedData = req.body;
@@ -98,7 +122,7 @@ app.put('/student/:id', (req, res) => {
       }
     });
 });
-
+//delete a student
 app.delete('/student/:id', (req, res) => {
     const { id } = req.params;
   
@@ -130,7 +154,7 @@ app.delete('/student/:id', (req, res) => {
       }
     });
 });
-
+//function to create unique Ids.
 function generateUniqueId() {
     const newId = uuidv4();
     return newId;
@@ -139,3 +163,4 @@ function generateUniqueId() {
 app.listen(port, () => {
   console.log(`Servidor em execução em http://localhost:${port}`);
 });
+
