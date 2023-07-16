@@ -2,6 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
+const multer = require('multer');
+const path = require('path');
 
 const studentFile = 'src/data/student.json'
 const app = express();
@@ -161,6 +163,56 @@ function generateUniqueId() {
     const newId = uuidv4();
     return newId;
 }
+// const upload = multer({
+//     storage: multer.memoryStorage()
+//   });
+// app.post('/photos/:user_id', upload.single('imagem'), (req, res) => {
+//     const { user_id } = req.params
+//     if (!req.file) {
+//         res.status(400).send('Nenhuma foto foi enviada');
+//     } else {
+//         const fileName = req.file.originalname;
+//         //const filePath = path.join(__dirname, 'labels',user_id, fileName);
+//         const filePath = `src/labels/${user_id}/${fileName}`;
+//         fs.writeFile(filePath, req.file.buffer, (err) => {
+//         if (err) {
+//             console.error('Erro ao salvar a foto:', err);
+//             res.status(500).send('Erro interno do servidor');
+//         } else {
+//             res.send('Foto salva com sucesso!');
+//         }
+//         });
+//     }
+//     });
+// Multer configuration
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+      const id = req.params.id; // Get the ID from the URL parameter
+      const directory = path.join(__dirname, 'src', 'labels', id); // Path to the ID folder
+  
+      // Check if the folder already exists
+      if (!fs.existsSync(directory)) {
+        // Create the folder if it doesn't exist
+        fs.mkdirSync(directory, { recursive: true });
+      }
+  
+      cb(null, directory);
+    },
+    filename: function (req, file, cb) {
+      cb(null, file.originalname);
+    },
+  });
+  
+  const upload = multer({ storage: storage });
+  
+  // Route to receive images
+  app.post('/photos/:id', upload.single('imagem'), (req, res) => {
+    if (!req.file) {
+      res.status(400).send('No image was uploaded');
+    } else {
+      res.send('Image saved successfully!');
+    }
+  });
 
 app.listen(port, () => {
   console.log(`Servidor em execução em http://localhost:${port}`);
