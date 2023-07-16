@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require('cors');
 const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
 
@@ -8,6 +9,7 @@ const port = 3000;
 
 
 app.use(express.json());
+app.use(cors());
 //get all students
 app.get('/student', (req, res) => {
     fs.readFile(studentFile, (err, jsonData) => {
@@ -111,11 +113,11 @@ app.put('/student/:id', (req, res) => {
   
           fs.writeFile(studentFile, JSON.stringify(existingData), (err) => {
             if (err) {
-              console.error('Erro ao salvar os dados:', err);
+              //console.error('Erro ao salvar os dados:', err);
               res.status(500).send('Erro interno do servidor');
             } else {
-              console.log('Dados atualizados com sucesso!');
-              res.send('Dados atualizados com sucesso!');
+              //console.log('Dados atualizados com sucesso!');
+              res.status(200).send(existingData[dataIndex]);
             }
           });
         }
