@@ -163,28 +163,7 @@ function generateUniqueId() {
     const newId = uuidv4();
     return newId;
 }
-// const upload = multer({
-//     storage: multer.memoryStorage()
-//   });
-// app.post('/photos/:user_id', upload.single('imagem'), (req, res) => {
-//     const { user_id } = req.params
-//     if (!req.file) {
-//         res.status(400).send('Nenhuma foto foi enviada');
-//     } else {
-//         const fileName = req.file.originalname;
-//         //const filePath = path.join(__dirname, 'labels',user_id, fileName);
-//         const filePath = `src/labels/${user_id}/${fileName}`;
-//         fs.writeFile(filePath, req.file.buffer, (err) => {
-//         if (err) {
-//             console.error('Erro ao salvar a foto:', err);
-//             res.status(500).send('Erro interno do servidor');
-//         } else {
-//             res.send('Foto salva com sucesso!');
-//         }
-//         });
-//     }
-//     });
-// Multer configuration
+
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
       const id = req.params.id; // Get the ID from the URL parameter
@@ -213,6 +192,28 @@ const storage = multer.diskStorage({
       res.send('Image saved successfully!');
     }
   });
+
+//get images
+app.get('/photos/:subfolder/:img', (req, res) => {
+    //const imageFilename = req.params.image_filename;
+    const subfolder = req.params.subfolder
+    const img = req.params.img
+    console.log(subfolder)
+    //const imagePath = `src/labels/${subfolder}/0.png`;
+    const imagePath = path.join(__dirname, 'src/labels', subfolder, `${img}.png`);
+    console.log(imagePath)
+    res.sendFile(imagePath, (err) => {
+        if (err) {
+        if (err.code === 'ENOENT') {
+            res.status(404).send('Image not found');
+        } else {
+            res.status(500).send('Internal Server Error');
+        }
+        }
+    });
+});
+
+
 
 app.listen(port, () => {
   console.log(`Servidor em execução em http://localhost:${port}`);
